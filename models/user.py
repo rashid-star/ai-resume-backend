@@ -1,3 +1,5 @@
+# User table model for authentication system
+
 from sqlalchemy import Column, Integer, String, TIMESTAMP
 from sqlalchemy.sql import func
 from database.base import Base

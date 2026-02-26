@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import func
 
-DATABASE_URL = "mysql+mysqlconnector://root:%40rashid9727@localhost/ai_resume_db"
+DATABASE_URL = "mysql+pymysql://root:%40rashid9727@localhost/ai_resume_db"
 engine = create_engine(DATABASE_URL, echo=True)
 
 SessionLocal = sessionmaker(
