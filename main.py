@@ -2,6 +2,8 @@
 # IMPORTS SECTION
 # ================================
 
+from fastapi.middleware.cors import CORSMiddleware
+
 # Admin routes
 from admin_routes import router as admin_router
 
@@ -42,6 +44,17 @@ from sqlalchemy.orm import Session
 # ================================
 
 app = FastAPI(title="AI Resume Analyzer Backend")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include admin routes (admin panel APIs)
 app.include_router(admin_router)
@@ -205,8 +218,8 @@ def upload_resume(
     new_resume = Resume(
         user_id=current_user.id,
         filename=file.filename,
+        content=text,   # ← THIS MUST EXIST
         score=resume_score,
-        resume_score=resume_score,
         ats_score=ats_score,
         best_role=best_role,
         missing_skills=missing_skills,
@@ -227,66 +240,6 @@ def upload_resume(
         "resume_score": resume_score,
         "best_role": best_role
     }
-
-# ================================
-# AI RESUME ANALYSIS API
-# ================================
-
-# Analyze an already uploaded resume using AI
-@app.get("/analyze-resume/{resume_id}")
-def analyze_resume(
-    resume_id: int,
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Analyze a stored resume using Groq AI.
-    - Fetch resume from DB
-    - Send content to AI
-    - Parse JSON response
-    - Save analysis, score, skills, roles
-    """
-
-    # Get resume from database
-    resume = db.query(Resume).filter(Resume.id == resume_id).first()
-    if not resume:
-        return {"error": "Resume not found"}
-
-    # Send resume content to AI
-    result = analyze_resume_with_ai(resume.content)
-
-    import json
-    import re
-
-    # Clean markdown if AI returns ```json ```
-    cleaned = re.sub(r"```json|```", "", result).strip()
-
-    try:
-        data = json.loads(cleaned)
-    except:
-        return {"error": "AI response not valid JSON", "raw": result}
-
-    # Save AI analysis results into DB
-    resume.analysis = cleaned
-    resume.score = data.get("score", 0)
-    resume.domain = data.get("domain", "")
-
-    resume.skills = ", ".join(data.get("skills_found", []))
-    resume.missing_skills = ", ".join(data.get("missing_skills", []))
-
-    # Save predicted job roles
-    resume.predicted_role = ", ".join(data.get("job_roles", []))
-
-    resume.improvements = ", ".join(data.get("improvements", []))
-
-    db.commit()
-    db.refresh(resume)
-
-    return {
-        "resume_id": resume.id,
-        "analysis": data
-    }
-
 
 # ================================
 # USER RESUME HISTORY APIs
@@ -311,12 +264,16 @@ def get_my_resumes(
 
     data = []
     for r in resumes:
-        data.append({
+            data.append({
             "id": r.id,
             "filename": r.filename,
-            "resume_score": r.resume_score,
+            "resume_score": r.score,
             "ats_score": r.ats_score,
             "best_role": r.best_role,
+            "summary": r.summary,
+            "strengths": r.strengths,
+            "missing_skills": r.missing_skills,
+            "improvements": r.improvements,
             "domain": r.domain,
             "created_at": r.created_at
         })
@@ -365,14 +322,24 @@ def my_dashboard(
     - total resumes
     - average score
     - best resume
-    - all resume details
+    - full resume details
     """
 
     user_id = current_user.id
-    resumes = db.query(Resume).filter(Resume.user_id == user_id).all()
-
+    resumes = (
+        db.query(Resume)
+        .filter(Resume.user_id == user_id)
+        .order_by(Resume.created_at.desc())
+        .all()
+    )
+    # If no resumes, return safe empty structure
     if not resumes:
-        return {"msg": "No resumes found"}
+        return {
+            "total_resumes": 0,
+            "average_score": 0,
+            "best_resume_score": 0,
+            "resumes": []
+        }
 
     total = len(resumes)
     avg_score = sum([r.score or 0 for r in resumes]) / total
@@ -381,19 +348,24 @@ def my_dashboard(
     return {
         "total_resumes": total,
         "average_score": round(avg_score, 2),
-        "best_resume_score": best_resume.score,
-        "best_resume_domain": best_resume.domain,
+        "best_resume_score": best_resume.score or 0,
         "resumes": [
             {
                 "id": r.id,
                 "filename": r.filename,
-                "score": r.score,
+                "resume_score": r.score,
+                "ats_score": r.ats_score,
+                "best_role": r.best_role,
+                "summary": r.summary,
+                "strengths": r.strengths,
+                "missing_skills": r.missing_skills,
+                "improvements": r.improvements,
                 "domain": r.domain,
-                "role": r.predicted_role
-            } for r in resumes
+                "created_at": r.created_at,
+            }
+            for r in resumes
         ]
     }
-
 
 # ================================
 # ADMIN PANEL APIs
