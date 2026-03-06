@@ -16,7 +16,7 @@ import fitz  # PyMuPDF
 # File handling
 import os
 import shutil
-from fastapi import UploadFile, File
+from fastapi import HTTPException, UploadFile, File
 
 # Database models
 from models.resume import Resume
@@ -99,7 +99,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     # Check if email already registered
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
-        return {"error": "Email already registered"}
+        raise HTTPException(status_code=400, detail="Email already registered")
 
     # Hash password before saving
     hashed_pw = hash_password(user.password)
