@@ -1,129 +1,137 @@
-🚀 AI Resume Analyzer – Frontend
+🤖 AI Resume Analyzer (Frontend)
 
-A modern web interface for the AI Resume Analyzer platform that allows users to upload resumes and receive AI-powered insights including resume score, ATS compatibility, strengths, missing skills, and improvement suggestions.
+A modern web interface for an AI-powered Resume Analyzer that evaluates resumes and provides insights such as resume score, ATS compatibility, strengths, missing skills, and improvement suggestions.
 
-This frontend is built using React and TailwindCSS and communicates with the FastAPI backend to perform AI analysis.
+This project demonstrates a full-stack AI application with a React frontend communicating with a FastAPI backend for AI-based resume analysis.
 
-🌐 Live Demo
+🚀 Live Demo
 
-👉 https://ai-resume-frontend-sigma.vercel.app
+Frontend (Vercel):
+https://ai-resume-frontend-sigma.vercel.app
 
-✨ Features
+Backend API:
+https://ai-resume-backend-production-f355.up.railway.app
 
-🔐 User Authentication (Register & Login)
+📌 Project Overview
 
-📄 Resume Upload (PDF)
+The AI Resume Analyzer allows users to upload their resume in PDF format and receive automated feedback powered by an LLM.
 
-🤖 AI-Powered Resume Analysis
+The platform analyzes resumes and provides:
 
-📊 Resume Score & ATS Score
+Resume Score
 
-💡 Strengths Detection
+ATS Compatibility Score
 
-⚠️ Missing Skills Identification
+Predicted Career Role
 
-🛠 Resume Improvement Suggestions
+Strengths Detection
 
-📂 Dashboard to view previous resume analyses
+Missing Skills Identification
 
-🌙 Dark Mode UI
+Resume Improvement Suggestions
 
-🛠 Tech Stack
+Resume History Dashboard
 
-Frontend Framework
+🧠 Tech Stack
+
 React
-Styling
+
+Vite
+
 Tailwind CSS
-Icons
-Lucide
-HTTP Requests
+
 Axios
-Deployment
-Vercel
-Backend API
-FastAPI
-AI Integration
-Groq
+
+Lucide Icons
+
+FastAPI (Backend API)
+
+Groq LLM (AI Analysis)
+
+MySQL (Database)
+
+Vercel (Frontend Deployment)
+
+Railway (Backend Deployment)
+
+⚙️ Application Workflow
+
+User registers and logs into the platform.
+
+User uploads a resume (PDF).
+
+Resume is sent to the FastAPI backend.
+
+Backend extracts resume text.
+
+Text is analyzed using a Groq LLM.
+
+AI generates structured insights.
+
+Results are stored in MySQL.
+
+Dashboard displays resume analysis history.
 
 📂 Project Structure
-src
+ai-resume-frontend/
 │
-├── components
-│   ├── Navbar.jsx
-│   ├── ResumeCard.jsx
-│   └── StatsCard.jsx
+├── src/
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── ResumeCard.jsx
+│   │   └── StatsCard.jsx
+│   │
+│   ├── pages/
+│   │   ├── Dashboard.jsx
+│   │   ├── Upload.jsx
+│   │   ├── Login.jsx
+│   │   └── Register.jsx
+│   │
+│   ├── api/
+│   │   └── api.js
+│   │
+│   ├── App.jsx
+│   └── main.jsx
 │
-├── pages
-│   ├── Dashboard.jsx
-│   ├── Upload.jsx
-│   ├── Login.jsx
-│   └── Register.jsx
-│
-├── api
-│   └── api.js
-│
-├── App.jsx
-└── main.jsx
-⚙️ Setup Instructions
-
-Clone the repository
-
-git clone https://github.com/your-username/ai-resume-frontend.git
+├── package.json
+└── README.md
+💻 How to Run Locally
+1️⃣ Clone repository
+git clone https://github.com/yourusername/ai-resume-frontend.git
 cd ai-resume-frontend
-
-Install dependencies
-
+2️⃣ Install dependencies
 npm install
-
-Run the development server
-
+3️⃣ Run development server
 npm run dev
 
-Open in browser
+Open browser:
 
 http://localhost:5173
-🔗 Backend API
+🌍 Deployment
 
-This frontend communicates with the backend API deployed on Railway.
+Frontend is deployed on Vercel.
 
-Example API Base URL:
+Deployment is automatically triggered when pushing updates to GitHub.
 
-https://ai-resume-backend-production-f355.up.railway.app
-🧠 How It Works
+🎯 Project Purpose
 
-User registers and logs in.
+This project was built to demonstrate:
 
-User uploads a resume in PDF format.
+Full-stack AI application development
 
-The resume is sent to the backend API.
+React + FastAPI integration
 
-The backend extracts resume text and sends it to an AI model.
+LLM-powered resume analysis
 
-AI analyzes the resume and returns structured insights.
+Cloud deployment workflow
 
-Results are displayed in the dashboard.
-
-📸 UI Highlights
-
-Animated resume cards
-
-Expandable analysis sections
-
-Score visualization
-
-Skill tags for strengths and missing skills
-
-Responsive design
-
-🚀 Deployment
-
-The frontend is deployed on:
-
-Vercel
-
-Deployment is automatic when pushing changes to GitHub.
+Real-world portfolio project for AI / ML roles
 
 👨‍💻 Author
 
 Mohammad Rashid
-Aspiring AI / Machine Learning Engineer
+Machine Learning & AI Enthusiast
+
+⭐ If you like this project
+
+Give it a star on GitHub ⭐
