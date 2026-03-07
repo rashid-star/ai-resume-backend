@@ -1,114 +1,109 @@
-# ================================
-# IMPORTS SECTION
-# ================================
+# ==========================================================
+# AI RESUME ANALYZER - MAIN BACKEND FILE
+# FastAPI application entry point
+# ==========================================================
 
+# -------------------------
+# IMPORTS
+# -------------------------
+
+# FastAPI core
+from fastapi import FastAPI, Depends, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-# Admin routes
-from admin_routes import router as admin_router
+# Database
+from sqlalchemy.orm import Session
+from database.base import Base
+from database.connection import engine, get_db
 
-# AI analysis service (Groq)
+# Models
+from models.user import User
+from models.resume import Resume
+
+# Schemas
+from schemas.user_schema import UserLogin, UserCreate
+
+# Auth utilities
+from utils.security import verify_password, hash_password
+from utils.jwt_handler import create_access_token
+from utils.auth import get_current_user
+
+# AI analysis service
 from services.groq_service import analyze_resume_with_ai
 
-# Resume PDF text extraction
+# Resume text extraction
 import fitz  # PyMuPDF
 
 # File handling
 import os
 import shutil
-from fastapi import HTTPException, UploadFile, File
-
-# Database models
-from models.resume import Resume
-from models.user import User
-
-# Auth & security utilities
-from utils.auth import get_current_user
-from utils.security import verify_password, hash_password
-from utils.jwt_handler import create_access_token
-
-# Schemas (request/response)
-from schemas.user_schema import UserLogin, UserCreate
-
-# Database setup
-from database.base import Base
-from database.connection import engine, get_db
-
-# FastAPI & DB
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
 
 
-# ================================
-# FASTAPI APP INITIALIZATION
-# ================================
+# ==========================================================
+# FASTAPI INITIALIZATION
+# ==========================================================
 
 app = FastAPI(title="AI Resume Analyzer Backend")
 
+# Enable CORS so frontend can communicate with backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to specific frontend URL in production
+    allow_origins=["*"],  # In production use frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include admin routes (admin panel APIs)
-app.include_router(admin_router)
-
-# Create database tables automatically
+# Automatically create database tables
 Base.metadata.create_all(bind=engine)
 
 
-# ================================
-# BASIC TEST ROUTES
-# ================================
+# ==========================================================
+# BASIC ROUTES
+# ==========================================================
 
-# Root route to check backend is running
 @app.get("/")
 def home():
-    return {"msg": "Backend running successfully 🚀"}
+    """
+    Simple health check route
+    """
+    return {"message": "AI Resume Analyzer Backend Running 🚀"}
 
 
-# Database connection test route
 @app.get("/test-db")
 def test_db(db: Session = Depends(get_db)):
     """
-    This endpoint checks whether database connection is working.
-    Used only for testing purposes.
+    Check if database connection is working
     """
-    return {"msg": "Database connected successfully ✅"}
+    return {"message": "Database connected successfully ✅"}
 
-# ================================
-# USER AUTHENTICATION APIs
-# ================================
 
-# Register new user
+# ==========================================================
+# USER AUTHENTICATION
+# ==========================================================
+
 @app.post("/register")
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     """
-    Register a new user account.
-    - Checks if email already exists
-    - Hashes password
-    - Stores user in database
+    Register new user
     """
 
-    # Check if email already registered
+    # Check if email already exists
     existing_user = db.query(User).filter(User.email == user.email).first()
+
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Hash password before saving
+    # Hash password
     hashed_pw = hash_password(user.password)
 
-    # Create new user object
+    # Create new user
     new_user = User(
         name=user.name,
         email=user.email,
         password=hashed_pw
     )
 
-    # Save to database
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -119,26 +114,20 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     }
 
 
-# User login API
 @app.post("/login")
 def login_user(user: UserLogin, db: Session = Depends(get_db)):
     """
-    Login user and return JWT token.
-    - Verifies email exists
-    - Checks password
-    - Returns access token
+    Login user and return JWT token
     """
 
-    # Check if user exists
     db_user = db.query(User).filter(User.email == user.email).first()
+
     if not db_user:
-        return {"error": "Invalid email"}
+        raise HTTPException(status_code=400, detail="Invalid email")
 
-    # Verify password
     if not verify_password(user.password, db_user.password):
-        return {"error": "Invalid password"}
+        raise HTTPException(status_code=400, detail="Invalid password")
 
-    # Generate JWT token
     token = create_access_token({"user_id": db_user.id})
 
     return {
@@ -147,12 +136,10 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
     }
 
 
-# Get current logged-in user profile
 @app.get("/me")
-def get_me(current_user = Depends(get_current_user)):
+def get_current_user_profile(current_user: User = Depends(get_current_user)):
     """
-    Returns currently logged-in user details.
-    Requires JWT token.
+    Get logged-in user profile
     """
 
     return {
@@ -162,23 +149,18 @@ def get_me(current_user = Depends(get_current_user)):
     }
 
 
-# ================================
+# ==========================================================
 # RESUME UPLOAD & AI ANALYSIS
-# ================================
+# ==========================================================
 
-# Upload resume, extract text, analyze with AI and save in DB
 @app.post("/upload-resume")
 def upload_resume(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Upload resume endpoint:
-    - Saves uploaded PDF
-    - Extracts text from resume
-    - Sends to AI (Groq) for analysis
-    - Saves score + insights in database
+    Upload resume and analyze using AI
     """
 
     # Ensure uploads folder exists
@@ -186,41 +168,63 @@ def upload_resume(
 
     file_path = f"uploads/{file.filename}"
 
-    # Save uploaded file locally
+    # Save uploaded PDF
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # Extract text from PDF using PyMuPDF
-    doc = fitz.open(file_path)
-    text = ""
+    # -------------------------
+    # Extract text from PDF
+    # -------------------------
 
-    for page in doc:
-        text += page.get_text()
+    try:
+        doc = fitz.open(file_path)
+        text = ""
 
-    doc.close()
+        for page in doc:
+            text += page.get_text()
 
-    # --- AI ANALYSIS ---
+        doc.close()
+
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to read PDF")
+
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="Resume text extraction failed")
+
+    # -------------------------
+    # AI ANALYSIS
+    # -------------------------
+
     ai_result = analyze_resume_with_ai(text)
 
-    # Extract values from AI result
-    resume_score = ai_result.get("resume_score")
-    ats_score = ai_result.get("ats_score")
-    best_role = ai_result.get("best_role")
-    missing_skills = ",".join(ai_result.get("missing_skills", []))
-    strengths = ",".join(ai_result.get("strengths", []))
-    improvements = ",".join(ai_result.get("improvements", []))
-    summary = ai_result.get("summary")
+    # Ensure safe values (avoid None in DB)
+    resume_score = ai_result.get("resume_score", 0)
+    ats_score = ai_result.get("ats_score", 0)
+    best_role = ai_result.get("best_role", "N/A")
+    summary = ai_result.get("summary", "No summary available")
 
-    # Save resume + analysis into database
+    strengths = ai_result.get("strengths", [])
+    missing_skills = ai_result.get("missing_skills", [])
+    improvements = ai_result.get("improvements", [])
+
+    # Convert lists → string for DB storage
+    strengths = ", ".join(strengths) if isinstance(strengths, list) else strengths
+    missing_skills = ", ".join(missing_skills) if isinstance(missing_skills, list) else missing_skills
+    improvements = ", ".join(improvements) if isinstance(improvements, list) else improvements
+
+    # -------------------------
+    # Save to database
+    # -------------------------
+
     new_resume = Resume(
         user_id=current_user.id,
         filename=file.filename,
-        content=text,   # ← THIS MUST EXIST
+        content=text,
         score=resume_score,
         ats_score=ats_score,
         best_role=best_role,
-        missing_skills=missing_skills,
         strengths=strengths,
+        missing_skills=missing_skills,
         improvements=improvements,
         summary=summary,
         analysis=str(ai_result)
@@ -231,37 +235,37 @@ def upload_resume(
     db.refresh(new_resume)
 
     return {
-        "message": "Resume uploaded and analyzed successfully 🚀",
+        "message": "Resume uploaded and analyzed successfully",
         "resume_id": new_resume.id,
-        "user": current_user.email,
         "resume_score": resume_score,
         "best_role": best_role
     }
 
-# ================================
-# USER RESUME HISTORY APIs
-# ================================
 
-# Get all resumes uploaded by current user
+# ==========================================================
+# USER RESUME HISTORY
+# ==========================================================
+
 @app.get("/my-resumes")
 def get_my_resumes(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Returns all resumes uploaded by logged-in user.
-    Used for dashboard/history page.
+    Return all resumes uploaded by the user
     """
 
-    user_id = current_user.id
-
-    resumes = db.query(Resume).filter(
-        Resume.user_id == user_id
-    ).order_by(Resume.created_at.desc()).all()
+    resumes = (
+        db.query(Resume)
+        .filter(Resume.user_id == current_user.id)
+        .order_by(Resume.created_at.desc())
+        .all()
+    )
 
     data = []
+
     for r in resumes:
-            data.append({
+        data.append({
             "id": r.id,
             "filename": r.filename,
             "resume_score": r.score,
@@ -271,65 +275,32 @@ def get_my_resumes(
             "strengths": r.strengths,
             "missing_skills": r.missing_skills,
             "improvements": r.improvements,
-            "domain": r.domain,
             "created_at": r.created_at
         })
 
     return {"resumes": data}
 
 
-# Get best resume based on score
-@app.get("/best-resume")
-def get_best_resume(
+# ==========================================================
+# USER DASHBOARD
+# ==========================================================
+
+@app.get("/my-dashboard")
+def my_dashboard(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Returns highest scoring resume of user.
-    Useful for resume comparison feature.
+    Dashboard statistics for user
     """
 
-    best = db.query(Resume).filter(
-        Resume.user_id == current_user.id
-    ).order_by(Resume.resume_score.desc()).first()
-
-    if not best:
-        return {"message": "No resumes found"}
-
-    return {
-        "filename": best.filename,
-        "resume_score": best.resume_score,
-        "ats_score": best.ats_score,
-        "best_role": best.best_role
-    }
-
-
-# ================================
-# USER DASHBOARD API
-# ================================
-
-# Dashboard statistics for logged-in user
-@app.get("/my-dashboard")
-def my_dashboard(
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    """
-    User dashboard summary:
-    - total resumes
-    - average score
-    - best resume
-    - full resume details
-    """
-
-    user_id = current_user.id
     resumes = (
         db.query(Resume)
-        .filter(Resume.user_id == user_id)
+        .filter(Resume.user_id == current_user.id)
         .order_by(Resume.created_at.desc())
         .all()
     )
-    # If no resumes, return safe empty structure
+
     if not resumes:
         return {
             "total_resumes": 0,
@@ -339,13 +310,15 @@ def my_dashboard(
         }
 
     total = len(resumes)
+
     avg_score = sum([r.score or 0 for r in resumes]) / total
+
     best_resume = max(resumes, key=lambda x: x.score or 0)
 
     return {
         "total_resumes": total,
         "average_score": round(avg_score, 2),
-        "best_resume_score": best_resume.score or 0,
+        "best_resume_score": best_resume.score,
         "resumes": [
             {
                 "id": r.id,
@@ -357,68 +330,8 @@ def my_dashboard(
                 "strengths": r.strengths,
                 "missing_skills": r.missing_skills,
                 "improvements": r.improvements,
-                "domain": r.domain,
                 "created_at": r.created_at
             }
             for r in resumes
         ]
-    }
-
-# ================================
-# ADMIN PANEL APIs
-# ================================
-
-from admin_utils import admin_required
-from sqlalchemy import func
-
-
-# Get all users (admin only)
-@app.get("/admin/all-users")
-def get_all_users(
-    db: Session = Depends(get_db),
-    admin: User = Depends(admin_required)
-):
-    """
-    Admin endpoint:
-    Returns all registered users.
-    """
-    users = db.query(User).all()
-    return users
-
-
-# Get all resumes in system (admin only)
-@app.get("/admin/all-resumes")
-def get_all_resumes(
-    db: Session = Depends(get_db),
-    admin: User = Depends(admin_required)
-):
-    """
-    Admin endpoint:
-    View all resumes uploaded by all users.
-    """
-    resumes = db.query(Resume).all()
-    return resumes
-
-
-# Admin dashboard stats
-@app.get("/admin/stats")
-def admin_stats(
-    db: Session = Depends(get_db),
-    admin: User = Depends(admin_required)
-):
-    """
-    Admin statistics:
-    - total users
-    - total resumes
-    - average resume score
-    """
-
-    total_users = db.query(User).count()
-    total_resumes = db.query(Resume).count()
-    avg_score = db.query(func.avg(Resume.score)).scalar()
-
-    return {
-        "total_users": total_users,
-        "total_resumes": total_resumes,
-        "average_resume_score": avg_score
     }
