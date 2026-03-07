@@ -1,137 +1,132 @@
-🤖 AI Resume Analyzer (Frontend)
+🚀 AI Resume Analyzer – Backend
 
-A modern web interface for an AI-powered Resume Analyzer that evaluates resumes and provides insights such as resume score, ATS compatibility, strengths, missing skills, and improvement suggestions.
+This is the backend API for the AI Resume Analyzer project.
 
-This project demonstrates a full-stack AI application with a React frontend communicating with a FastAPI backend for AI-based resume analysis.
+Built using FastAPI, this service handles authentication, resume uploads, AI analysis, and database storage. It communicates with the frontend and processes resumes using an AI model.
 
-🚀 Live Demo
+The backend is responsible for:
 
-Frontend (Vercel):
-https://ai-resume-frontend-sigma.vercel.app
+User authentication
 
-Backend API:
-https://ai-resume-backend-production-f355.up.railway.app
+Resume text extraction
 
-📌 Project Overview
+AI-powered resume analysis
 
-The AI Resume Analyzer allows users to upload their resume in PDF format and receive automated feedback powered by an LLM.
+Storing results in a database
 
-The platform analyzes resumes and provides:
+Providing dashboard data through APIs
 
-Resume Score
+📌 Features
 
-ATS Compatibility Score
+🔐 User Authentication (Register / Login)
 
-Predicted Career Role
+📄 Resume Upload (PDF)
 
-Strengths Detection
+🧠 AI Resume Analysis
 
-Missing Skills Identification
+📊 Resume Score & ATS Score
 
-Resume Improvement Suggestions
+💡 Strengths Detection
 
-Resume History Dashboard
+⚠️ Missing Skills Identification
 
-🧠 Tech Stack
+🛠 Resume Improvement Suggestions
 
-React
+📂 Resume History Dashboard API
 
-Vite
+🔑 JWT Token Authentication
 
-Tailwind CSS
+🛠 Tech Stack
+Technology	Usage
+FastAPI	Backend framework
+SQLAlchemy	ORM for database
+MySQL	Database
+PyMuPDF	PDF text extraction
+Groq API	AI resume analysis
+JWT	Authentication
+Uvicorn	ASGI server
+🖥 How To Run This Project
+1️⃣ Clone Repository
+git clone https://github.com/rashid-star/ai-resume-backend.git
+cd ai-resume-backend
+2️⃣ Install Dependencies
+pip install -r requirements.txt
+3️⃣ Setup Environment Variables
 
-Axios
+Create a .env file in the project root:
 
-Lucide Icons
+DATABASE_URL=your_database_connection_url
+GROQ_API_KEY=your_groq_api_key
+SECRET_KEY=your_jwt_secret_key
+4️⃣ Run Backend Server
+uvicorn main:app --reload
 
-FastAPI (Backend API)
+Server will run at:
 
-Groq LLM (AI Analysis)
+http://127.0.0.1:8000
 
-MySQL (Database)
+API documentation available at:
 
-Vercel (Frontend Deployment)
+http://127.0.0.1:8000/docs
+🔗 Frontend Requirement
 
-Railway (Backend Deployment)
+This backend is used by the frontend application.
 
-⚙️ Application Workflow
+Frontend Repository:
 
-User registers and logs into the platform.
+👉 https://github.com/rashid-star/ai-resume-frontend
 
-User uploads a resume (PDF).
-
-Resume is sent to the FastAPI backend.
-
-Backend extracts resume text.
-
-Text is analyzed using a Groq LLM.
-
-AI generates structured insights.
-
-Results are stored in MySQL.
-
-Dashboard displays resume analysis history.
-
-📂 Project Structure
-ai-resume-frontend/
-│
-├── src/
-│   ├── components/
-│   │   ├── Navbar.jsx
-│   │   ├── ResumeCard.jsx
-│   │   └── StatsCard.jsx
-│   │
-│   ├── pages/
-│   │   ├── Dashboard.jsx
-│   │   ├── Upload.jsx
-│   │   ├── Login.jsx
-│   │   └── Register.jsx
-│   │
-│   ├── api/
-│   │   └── api.js
-│   │
-│   ├── App.jsx
-│   └── main.jsx
-│
-├── package.json
-└── README.md
-💻 How to Run Locally
-1️⃣ Clone repository
-git clone https://github.com/yourusername/ai-resume-frontend.git
-cd ai-resume-frontend
-2️⃣ Install dependencies
-npm install
-3️⃣ Run development server
-npm run dev
-
-Open browser:
+Frontend runs at:
 
 http://localhost:5173
-🌍 Deployment
+📁 Project Structure
+ai-resume-backend/
+│
+├── database/
+│   ├── base.py
+│   └── connection.py
+│
+├── models/
+│   ├── user.py
+│   └── resume.py
+│
+├── schemas/
+│   └── user_schema.py
+│
+├── services/
+│   └── groq_service.py
+│
+├── utils/
+│   ├── auth.py
+│   ├── jwt_handler.py
+│   └── security.py
+│
+├── uploads/
+│
+├── main.py
+└── requirements.txt
+⚙ API Endpoints
+Method	Endpoint	Description
+POST	/register	Register new user
+POST	/login	User login
+GET	/me	Get current user
+POST	/upload-resume	Upload resume and analyze
+GET	/my-dashboard	Get user dashboard data
+🎯 Future Improvements
 
-Frontend is deployed on Vercel.
+Job description matching
 
-Deployment is automatically triggered when pushing updates to GitHub.
+Resume keyword optimization
 
-🎯 Project Purpose
+Resume comparison
 
-This project was built to demonstrate:
+Admin dashboard
 
-Full-stack AI application development
-
-React + FastAPI integration
-
-LLM-powered resume analysis
-
-Cloud deployment workflow
-
-Real-world portfolio project for AI / ML roles
+AI interview preparation suggestions
 
 👨‍💻 Author
 
 Mohammad Rashid
-Machine Learning & AI Enthusiast
 
-⭐ If you like this project
-
-Give it a star on GitHub ⭐
+GitHub:
+https://github.com/rashid-star
