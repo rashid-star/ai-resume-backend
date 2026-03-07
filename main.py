@@ -358,7 +358,7 @@ def my_dashboard(
                 "missing_skills": r.missing_skills,
                 "improvements": r.improvements,
                 "domain": r.domain,
-                "created_at": r.created_at,
+                "created_at": r.created_at
             }
             for r in resumes
         ]
