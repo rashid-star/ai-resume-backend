@@ -22,21 +22,14 @@ def analyze_resume_with_ai(resume_text: str):
     """
 
     prompt = f"""
-You are an expert ATS resume analyzer and career advisor.
+You are an ATS resume analyzer.
 
 Analyze the resume and return ONLY valid JSON.
 
 Resume:
 {resume_text}
 
-Tasks:
-1. Evaluate resume quality and ATS compatibility.
-2. Predict the best career role based on skills and experience.
-3. Identify strengths found in the resume.
-4. Identify missing skills required for the predicted role.
-5. Suggest improvements to strengthen the resume.
-
-Return JSON exactly in this format:
+Return JSON in this format:
 
 {{
  "resume_score": number,
@@ -50,12 +43,12 @@ Return JSON exactly in this format:
 }}
 
 Rules:
-- resume_score must be between 0 and 100
-- ats_score must be between 0 and 100
-- domain examples: Artificial Intelligence, Data Science, Web Development, DevOps, Software Engineering
-- strengths must reflect technologies actually mentioned in the resume
-- missing_skills must be relevant to the predicted best_role
-- improvements should suggest practical ways to improve the resume (projects, skills, certifications)
+- resume_score and ats_score must be between 0 and 100
+- best_role should match the candidate's main skills
+- domain examples: Data Science, Artificial Intelligence, Web Development, DevOps, Software Engineering
+- strengths should highlight the most relevant skills for the predicted role
+- missing_skills should be skills required for that role but not clearly shown in the resume
+- improvements should suggest practical resume improvements (projects, tools, certifications)
 - summary must be concise (2-3 sentences)
 - Return STRICT JSON only
 """
