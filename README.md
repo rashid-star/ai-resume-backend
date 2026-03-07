@@ -1,211 +1,142 @@
-AI Resume Analyzer – Backend : https://ai-resume-backend-production-f355.up.railway.app/docs
+🚀 AI Resume Analyzer – Frontend
 
-Backend service for the AI Resume Analyzer, a full-stack application that analyzes resumes using AI and provides insights such as ATS score, strengths, missing skills, and improvement suggestions.
+A modern web interface for the AI Resume Analyzer platform that allows users to upload resumes and receive AI-powered insights including resume score, ATS compatibility, strengths, missing skills, and improvement suggestions.
 
-This backend is built with FastAPI and integrates with an LLM (Groq) to generate intelligent resume feedback.
+This frontend is built using React and TailwindCSS and communicates with the FastAPI backend to perform AI analysis.
 
-Features
+🌐 Live Demo
 
-User authentication (Register & Login)
+👉 https://ai-resume-frontend-sigma.vercel.app
 
-Resume PDF upload
+✨ Features
 
-Resume text extraction
+🔐 User Authentication (Register & Login)
 
-AI-powered resume analysis
+📄 Resume Upload (PDF)
 
-ATS compatibility scoring
+🤖 AI-Powered Resume Analysis
 
-Strength detection
+📊 Resume Score & ATS Score
 
-Missing skills identification
+💡 Strengths Detection
 
-Resume improvement suggestions
+⚠️ Missing Skills Identification
 
-Dashboard API for resume history
+🛠 Resume Improvement Suggestions
 
-Tech Stack
+📂 Dashboard to view previous resume analyses
 
-Backend Framework
+🌙 Dark Mode UI
+
+🛠 Tech Stack
+
+Frontend Framework
+
+React
+
+Styling
+
+Tailwind CSS
+
+Icons
+
+Lucide
+
+HTTP Requests
+
+Axios
+
+Deployment
+
+Vercel
+
+Backend API
 
 FastAPI
 
 AI Integration
 
-Groq LLM API
+Groq
 
-Database
-
-MySQL (hosted on Railway)
-
-ORM
-
-SQLAlchemy
-
-Authentication
-
-JWT (JSON Web Tokens)
-
-File Processing
-
-PyMuPDF for PDF text extraction
-
-Deployment
-
-Hosted on Railway
-
-Project Structure
-ai-resume-backend
+📂 Project Structure
+src
 │
-├── database
-│   ├── base.py
-│   └── connection.py
+├── components
+│   ├── Navbar.jsx
+│   ├── ResumeCard.jsx
+│   └── StatsCard.jsx
 │
-├── models
-│   ├── user.py
-│   └── resume.py
+├── pages
+│   ├── Dashboard.jsx
+│   ├── Upload.jsx
+│   ├── Login.jsx
+│   └── Register.jsx
 │
-├── schemas
-│   └── user_schema.py
+├── api
+│   └── api.js
 │
-├── services
-│   └── groq_service.py
-│
-├── utils
-│   ├── auth.py
-│   ├── jwt_handler.py
-│   └── security.py
-│
-├── uploads
-│
-├── main.py
-└── requirements.txt
-API Endpoints
-Authentication
-
-Register User
-
-POST /register
-
-Login
-
-POST /login
-
-Get Current User
-
-GET /me
-Resume Analysis
-
-Upload Resume
-
-POST /upload-resume
-
-Uploads a PDF resume and returns AI analysis including:
-
-Resume Score
-
-ATS Score
-
-Best Career Role
-
-Strengths
-
-Missing Skills
-
-Improvements
-
-Summary
-
-Dashboard
-
-User Dashboard
-
-GET /my-dashboard
-
-Returns:
-
-Total resumes
-
-Average score
-
-Best resume score
-
-Full resume analysis history
-
-Environment Variables
-
-Create a .env file in the root directory.
-
-Example:
-
-DATABASE_URL=your_mysql_connection_url
-GROQ_API_KEY=your_groq_api_key
-JWT_SECRET_KEY=your_secret_key
-Running Locally
+├── App.jsx
+└── main.jsx
+⚙️ Setup Instructions
 
 Clone the repository
 
-git clone https://github.com/your-username/ai-resume-backend.git
-cd ai-resume-backend
+git clone https://github.com/your-username/ai-resume-frontend.git
+cd ai-resume-frontend
 
 Install dependencies
 
-pip install -r requirements.txt
+npm install
 
-Run the server
+Run the development server
 
-uvicorn main:app --reload
+npm run dev
 
-API documentation will be available at:
+Open in browser
 
-http://127.0.0.1:8000/docs
-Live Deployment
+http://localhost:5173
+🔗 Backend API
 
-Backend is deployed on:
+This frontend communicates with the backend API deployed on Railway.
 
-Railway
+Example API Base URL:
 
-Example base URL:
+https://ai-resume-backend-production-f355.up.railway.app
+🧠 How It Works
 
-https://your-backend-url.railway.app
-Frontend
+User registers and logs in.
 
-Frontend application built with React + TailwindCSS.
+User uploads a resume in PDF format.
 
-Live demo:
+The resume is sent to the backend API.
 
-https://ai-resume-frontend-sigma.vercel.app
+The backend extracts resume text and sends it to an AI model.
 
-Frontend hosted on Vercel.
+AI analyzes the resume and returns structured insights.
 
-How AI Analysis Works
+Results are displayed in the dashboard.
 
-User uploads a resume PDF
+📸 UI Highlights
 
-Backend extracts text using PyMuPDF
+Animated resume cards
 
-Resume text is sent to the Groq LLM
+Expandable analysis sections
 
-LLM analyzes resume and returns structured JSON
+Score visualization
 
-Backend stores results in MySQL
+Skill tags for strengths and missing skills
 
-Dashboard displays analysis to the user
+Responsive design
 
-Future Improvements
+🚀 Deployment
 
-Job description matching
+The frontend is deployed on:
 
-Resume keyword optimization
+Vercel
 
-Resume improvement suggestions with examples
+Deployment is automatic when pushing changes to GitHub.
 
-Better ATS keyword analysis
-
-Multi-resume comparison
-
-Author
+👨‍💻 Author
 
 Mohammad Rashid
-
-Machine Learning Eng
+Aspiring AI / Machine Learning Engineer
