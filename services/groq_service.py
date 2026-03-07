@@ -22,30 +22,40 @@ def analyze_resume_with_ai(resume_text: str):
     """
 
     prompt = f"""
-You are a professional ATS resume analyzer.
+You are an expert ATS resume analyzer and career advisor.
 
 Analyze the resume and return ONLY valid JSON.
 
 Resume:
 {resume_text}
 
-Return JSON exactly like this:
+Tasks:
+1. Evaluate resume quality and ATS compatibility.
+2. Predict the best career role based on skills and experience.
+3. Identify strengths found in the resume.
+4. Identify missing skills required for the predicted role.
+5. Suggest improvements to strengthen the resume.
+
+Return JSON exactly in this format:
 
 {{
  "resume_score": number,
  "ats_score": number,
  "best_role": "string",
+ "domain": "string",
+ "strengths": ["skill1","skill2"],
  "missing_skills": ["skill1","skill2"],
- "strengths": ["strength1","strength2"],
  "improvements": ["improvement1","improvement2"],
- "summary": "short summary"
+ "summary": "2-3 sentence professional summary"
 }}
 
 Rules:
-- resume_score out of 100
-- ats_score out of 100
-- Return STRICT JSON
-- No explanation
+- resume_score must be between 0 and 100
+- ats_score must be between 0 and 100
+- domain examples: Artificial Intelligence, Data Science, Web Development, DevOps, Software Engineering
+- Missing skills must depend on the predicted best_role
+- Summary must be concise (2-3 sentences)
+- Return STRICT JSON only
 """
 
     try:
@@ -58,10 +68,10 @@ Rules:
 
         result = response.choices[0].message.content.strip()
 
-        # Remove markdown if present
+        # Remove markdown formatting if present
         cleaned = re.sub(r"```json|```", "", result).strip()
 
-        # Extract JSON block if model added extra text
+        # Extract JSON block
         json_match = re.search(r"\{.*\}", cleaned, re.DOTALL)
 
         if not json_match:
@@ -75,6 +85,7 @@ Rules:
             "resume_score": data.get("resume_score", 0),
             "ats_score": data.get("ats_score", 0),
             "best_role": data.get("best_role", "N/A"),
+            "domain": data.get("domain", "General"),
             "missing_skills": data.get("missing_skills", []),
             "strengths": data.get("strengths", []),
             "improvements": data.get("improvements", []),
@@ -84,11 +95,12 @@ Rules:
     except Exception as e:
         print("Groq AI Error:", e)
 
-        # Always return safe structure
+        # Safe fallback response
         return {
             "resume_score": 0,
             "ats_score": 0,
             "best_role": "N/A",
+            "domain": "Unknown",
             "missing_skills": [],
             "strengths": [],
             "improvements": [],
