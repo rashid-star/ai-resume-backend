@@ -31,31 +31,18 @@ This frontend is built using React and TailwindCSS and communicates with the Fas
 🛠 Tech Stack
 
 Frontend Framework
-
 React
-
 Styling
-
 Tailwind CSS
-
 Icons
-
 Lucide
-
 HTTP Requests
-
 Axios
-
 Deployment
-
 Vercel
-
 Backend API
-
 FastAPI
-
 AI Integration
-
 Groq
 
 📂 Project Structure
