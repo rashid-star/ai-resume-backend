@@ -53,8 +53,10 @@ Rules:
 - resume_score must be between 0 and 100
 - ats_score must be between 0 and 100
 - domain examples: Artificial Intelligence, Data Science, Web Development, DevOps, Software Engineering
-- Missing skills must depend on the predicted best_role
-- Summary must be concise (2-3 sentences)
+- strengths must reflect technologies actually mentioned in the resume
+- missing_skills must be relevant to the predicted best_role
+- improvements should suggest practical ways to improve the resume (projects, skills, certifications)
+- summary must be concise (2-3 sentences)
 - Return STRICT JSON only
 """
 
