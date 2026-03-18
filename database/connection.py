@@ -15,7 +15,6 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 
-# Dependency for FastAPI routes
 def get_db():
     db = SessionLocal()
     try:
