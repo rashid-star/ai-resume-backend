@@ -59,13 +59,23 @@ def process_resumes(token):
             if response.status_code == 200:
                 data = response.json()
 
+                # 🔥 DEBUG (see actual response)
+                print("API RESPONSE:", data)
+
+                # ✅ Safe extraction
                 results.append({
                     "File Name": file,
-                    "Score": data.get("score"),
-                    "ATS Score": data.get("ats_score"),
                     "Best Role": data.get("best_role"),
-                    "Strengths": str(data.get("strengths")),
-                    "Missing Skills": str(data.get("missing_skills"))
+
+                    # fallback if keys missing
+                    "Score": data.get("score") or "N/A",
+                    "ATS Score": data.get("ats_score") or "N/A",
+
+                    "Strengths": str(data.get("strengths") or "Not available"),
+                    "Missing Skills": str(data.get("missing_skills") or "Not available"),
+
+                    # 🔥 always capture full response
+                    "Full Analysis": str(data)
                 })
 
             else:
