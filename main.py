@@ -45,11 +45,20 @@ import shutil
 
 app = FastAPI(title="AI Resume Analyzer Backend")
 
-# Enable CORS so frontend can communicate with backend
+# Enable CORS so browsers (Vercel frontend) can call the API.
+# NOTE: `allow_credentials=True` cannot be used with `allow_origins=["*"]` in browsers.
+frontend_origins_env = os.getenv("FRONTEND_ORIGINS", "").strip()
+frontend_origins = (
+    [o.strip() for o in frontend_origins_env.split(",") if o.strip()]
+    if frontend_origins_env
+    else ["*"]
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production use frontend URL
-    allow_credentials=True,
+    allow_origins=frontend_origins,
+    # This app uses JWT via Authorization header, not cookies; keep credentials off.
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
