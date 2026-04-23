@@ -4,11 +4,12 @@ import requests
 import pandas as pd
 
 from dotenv import load_dotenv
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image
-import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 load_dotenv()
 
@@ -62,25 +63,49 @@ def process_resumes(token):
 
 # 📸 Step 3: Take dashboard screenshot
 def take_screenshot():
-    driver = webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    options.add_argument("--start-maximized")
 
-    # open login page
+    driver = webdriver.Chrome(options=options)
+
     driver.get("https://ai-resume-frontend-sigma.vercel.app/login")
-    time.sleep(5)
 
-    # 🔐 login (NOW works because you added name/id)
-    driver.find_element(By.NAME, "email").send_keys(EMAIL)
-    driver.find_element(By.NAME, "password").send_keys(PASSWORD)
+    # 🔥 WAIT LONGER for React app
+    time.sleep(12)
 
-    driver.find_element(By.ID, "login-btn").click()
+    print("Page loaded:", len(driver.page_source))
 
-    time.sleep(5)
+    # 🔥 Wait until page actually contains "Login"
+    if "Login" not in driver.page_source:
+        print("❌ React not loaded properly")
+        driver.save_screenshot("output/debug.png")
+        driver.quit()
+        return "output/debug.png"
 
-    # go to dashboard
+    # Now find inputs
+    inputs = driver.find_elements(By.TAG_NAME, "input")
+    print("Inputs found:", len(inputs))
+
+    if len(inputs) < 2:
+        print("❌ Inputs still not found")
+        driver.save_screenshot("output/debug2.png")
+        driver.quit()
+        return "output/debug2.png"
+
+    # fill login
+    inputs[0].send_keys(EMAIL)
+    inputs[1].send_keys(PASSWORD)
+
+    # click button
+    buttons = driver.find_elements(By.TAG_NAME, "button")
+    buttons[0].click()
+
+    time.sleep(6)
+
+    # go dashboard
     driver.get("https://ai-resume-frontend-sigma.vercel.app/dashboard")
-    time.sleep(5)
+    time.sleep(6)
 
-    # save screenshot
     os.makedirs("output", exist_ok=True)
     path = "output/dashboard.png"
 
@@ -90,7 +115,6 @@ def take_screenshot():
     print("📸 Screenshot saved")
 
     return path
-
 
 # 📊 Step 4: Save Excel + Image
 def save_excel(results, image_path):
